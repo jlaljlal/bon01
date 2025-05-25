@@ -1,0 +1,3364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الدعم - Support</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', Arial, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            background-color: #f5f7fa;
+            transition: all 0.3s;
+            color: #2c3e50;
+        }
+        
+        /* القائمة الجانبية */
+        .sidebar {
+            width: 300px;
+            background-color: #2c3e50;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            transition: all 0.3s;
+            overflow-y: auto;
+            z-index: 1000;
+            right: -300px;
+            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar.open {
+            right: 0;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 22px;
+            color: #ecf0f1;
+        }
+        
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .close-sidebar:hover {
+            transform: rotate(90deg);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ecf0f1;
+            font-size: 16px;
+        }
+        
+        .user-id {
+            font-size: 13px;
+            color: #bdc3c7;
+            margin-bottom: 5px;
+        }
+        
+        .user-points {
+            font-size: 14px;
+            color: #f1c40f;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-points i {
+            margin-left: 5px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-menu a {
+            color: #ecf0f1;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 15px;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: #34495e;
+            transform: translateX(-5px);
+        }
+        
+        .sidebar-menu i {
+            margin-left: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            margin-top: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logout-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .logout-btn i {
+            margin-left: 8px;
+        }
+        
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            padding: 25px;
+            transition: all 0.3s;
+            margin-right: 0;
+            max-width: 100%;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #2c3e50;
+            transition: all 0.3s;
+            padding: 8px;
+            border-radius: 50%;
+        }
+        
+        .menu-toggle:hover {
+            background-color: #e0e0e0;
+            transform: rotate(90deg);
+        }
+        
+        .page-title {
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+            text-align: center;
+            flex-grow: 1;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #2c3e50;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .notification-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #2c3e50;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .chat-btn:hover {
+            background-color: #e0e0e0;
+        }
+        
+        /* نظام الإشعارات */
+        .notifications-container {
+            position: fixed;
+            top: 0;
+            left: -400px;
+            width: 400px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            z-index: 1100;
+            transition: all 0.3s;
+            overflow-y: auto;
+        }
+        
+        .notifications-container.open {
+            left: 0;
+        }
+        
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        .notifications-header h3 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .close-notifications {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .notifications-list {
+            padding: 15px;
+        }
+        
+        .notification-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .notification-item:hover {
+            background-color: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .notification-item.unread {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .notification-content {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: #888;
+            text-align: left;
+        }
+        
+        /* نظام الدردشة */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 1050;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-container.open {
+            display: flex;
+        }
+        
+        .chat-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .chat-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 300px;
+            background-color: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message-sender {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .message-content {
+            background-color: white;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
+            text-align: left;
+        }
+        
+        .message.me .message-content {
+            background-color: #3498db;
+            color: white;
+            align-self: flex-end;
+        }
+        
+        .message.me .message-sender {
+            text-align: right;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        .chat-input button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        /* بطاقات المنشورات */
+        .posts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .post-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .post-media {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .post-media.empty {
+            height: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .media-placeholder {
+            color: #777;
+            font-size: 16px;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* نسبة 16:9 */
+            height: 0;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .image-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .post-content {
+            padding: 15px;
+        }
+        
+        .post-text {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            white-space: pre-line;
+            font-size: 15px;
+        }
+        
+        .post-owner {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .post-owner-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 10px;
+        }
+        
+        .post-action {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .post-action:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .post-action i {
+            margin-left: 5px;
+        }
+        
+        /* نظام التعليقات */
+        .comments-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .comment {
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 8px;
+            border-left: 3px solid #3498db;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .comment-user {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        
+        .comment-user-avatar {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .comment-actions {
+            display: flex;
+        }
+        
+        .comment-actions button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        
+        .comment-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+        
+        .comment-time {
+            font-size: 11px;
+            color: #888;
+            text-align: left;
+        }
+        
+        .add-comment {
+            margin-top: 15px;
+        }
+        
+        .add-comment textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .add-comment button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .add-comment button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* النماذج */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1200;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .submit-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        /* نظام النقاط */
+        .transfer-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        /* التنبيهات */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert i {
+            margin-left: 10px;
+            font-size: 18px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* مؤشر التحميل */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* صفحة الملف الشخصي */
+        .profile-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .profile-id {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .profile-points {
+            font-size: 20px;
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .profile-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .profile-btn i {
+            margin-left: 8px;
+        }
+        
+        .transfer-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .transfer-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .buy-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .buy-btn:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+        
+        .daily-btn {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        .daily-btn:hover {
+            background-color: #8e44ad;
+            transform: translateY(-2px);
+        }
+        
+        .challenge-btn {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        .challenge-btn:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+        }
+        
+        .user-posts-title {
+            font-size: 22px;
+            margin: 25px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        /* نظام المهام اليومية */
+        .daily-tasks {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .daily-tasks h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .task-checkbox {
+            margin-left: 15px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .task-info {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .task-reward {
+            font-size: 13px;
+            color: #f39c12;
+        }
+        
+        .task-completed {
+            color: #2ecc71;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .task-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        /* نظام التحديات */
+        .challenges-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .challenges-container h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .challenge-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #e67e22;
+        }
+        
+        .challenge-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .challenge-description {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .challenge-reward {
+            font-size: 14px;
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .challenge-participants {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .challenge-btn {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .challenge-btn:hover {
+            background-color: #d35400;
+        }
+        
+        /* لوحة المتصدرين */
+        .leaderboard {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .leaderboard h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+        
+        .leaderboard-rank {
+            width: 30px;
+            height: 30px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+        
+        .leaderboard-rank.top {
+            background-color: #f1c40f;
+        }
+        
+        .leaderboard-user {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .leaderboard-info {
+            flex: 1;
+        }
+        
+        .leaderboard-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .leaderboard-points {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        
+        /* التجاوبية */
+        @media (max-width: 992px) {
+            .posts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .notifications-container {
+                width: 90%;
+                left: -90%;
+            }
+            
+            .notifications-container.open {
+                left: 0;
+            }
+            
+            .chat-container {
+                width: 90%;
+                right: 5%;
+                bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .profile-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .profile-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* الظل عند فتح القائمة */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 900;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        /* تأثيرات الحركة */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- الظل للقائمة الجانبية -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- القائمة الجانبية -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>نظام الدعم</h2>
+            <button class="close-sidebar" id="closeSidebar">&times;</button>
+        </div>
+        
+        <div class="user-profile" id="userProfileSection" style="display:none;">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <div class="user-name" id="userName"></div>
+                <div class="user-id">ID: <span id="userId"></span></div>
+                <div class="user-points"><i class="fas fa-coins"></i> النقاط: <span id="userPoints">0</span></div>
+            </div>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active" id="homeLink"><i class="fas fa-home"></i> الرئيسية</a></li>
+            <li><a href="#" id="addPostLink"><i class="fas fa-plus-circle"></i> إضافة منشور</a></li>
+            <li><a href="#" id="transferPointsLink"><i class="fas fa-exchange-alt"></i> تحويل نقاط</a></li>
+            <li><a href="#" id="profileLink"><i class="fas fa-user"></i> الملف الشخصي</a></li>
+            <li><a href="#" id="dailyTasksLink"><i class="fas fa-tasks"></i> المهام اليومية</a></li>
+            <li><a href="#" id="challengesLink"><i class="fas fa-trophy"></i> التحديات</a></li>
+            <li><a href="#" id="leaderboardLink"><i class="fas fa-medal"></i> المتصدرون</a></li>
+            <li><a href="#" id="adminPanelLink" style="display:none;"><i class="fas fa-cog"></i> لوحة التحكم</a></li>
+        </ul>
+        
+        <div id="loginSection">
+            <div class="form-group">
+                <label for="username">اسم المستخدم:</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة المرور:</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button onclick="login()" class="submit-btn" id="loginBtn">تسجيل الدخول</button>
+            <button onclick="showRegisterForm()" class="submit-btn" style="background-color: #2ecc71; margin-top:10px;">تسجيل حساب جديد</button>
+            <div id="loginResult" style="margin-top:15px;"></div>
+        </div>
+        
+        <button class="logout-btn" id="logoutBtn" style="display:none;" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+        </button>
+    </aside>
+
+    <!-- نافذة الإشعارات -->
+    <div class="notifications-container" id="notificationsContainer">
+        <div class="notifications-header">
+            <h3>الإشعارات</h3>
+            <button class="close-notifications" id="closeNotifications">&times;</button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <!-- سيتم ملء الإشعارات هنا ديناميكيًا -->
+        </div>
+    </div>
+
+    <!-- نافذة الدردشة -->
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header" id="chatHeader">
+            <h3>الدردشة مع <span id="chatWithUser"></span></h3>
+            <button class="close-chat" id="closeChat">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- سيتم ملء الرسائل هنا ديناميكيًا -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatMessageInput" placeholder="اكتب رسالتك هنا...">
+            <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content" id="mainContent">
+        <div class="header">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h1 class="page-title">رحلتك مع نظام الدعم قد بدأت... فلتكن مليئة بالثقة والدعم الحقيقي</h1>
+            <div class="header-actions">
+                <button class="notification-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display:none;">0</span>
+                </button>
+                <button class="chat-btn" id="chatBtn">
+                    <i class="fas fa-comments"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <!-- محتوى الصفحة الرئيسية -->
+        <div id="homePage">
+            <div id="postsContainer" class="posts-container">
+                <div class="post-card">
+                    <div class="post-media empty">
+                        <div class="media-placeholder">جاري تحميل المنشورات...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="loadingMore" style="text-align: center; margin: 20px 0; display: none;">
+                <div class="loader"></div>
+                <p>جاري تحميل المزيد من المنشورات...</p>
+            </div>
+        </div>
+        
+        <!-- محتوى صفحة الملف الشخصي -->
+        <div id="profilePage" style="display: none;">
+            <div class="profile-container">
+                <div class="profile-avatar" id="profileAvatar"></div>
+                <h2 class="profile-name" id="profileName"></h2>
+                <div class="profile-id">ID: <span id="profileId"></span></div>
+                <div class="profile-points"><i class="fas fa-coins"></i> النقاط: <span id="profilePoints"></span></div>
+                
+                <div class="profile-actions">
+                    <button class="profile-btn transfer-btn" onclick="openModal('transferPointsModal')">
+                        <i class="fas fa-exchange-alt"></i> تحويل نقاط
+                    </button>
+                    <button class="profile-btn buy-btn" onclick="showAlert('سيتم تفعيل هذه الميزة قريباً', 'info')">
+                        <i class="fas fa-shopping-cart"></i> شراء نقاط
+                    </button>
+                    <button class="profile-btn daily-btn" onclick="showDailyTasks()">
+                        <i class="fas fa-tasks"></i> المهام اليومية
+                    </button>
+                    <button class="profile-btn challenge-btn" onclick="showChallenges()">
+                        <i class="fas fa-trophy"></i> التحديات
+                    </button>
+                </div>
+            </div>
+            
+            <h3 class="user-posts-title">منشوراتي</h3>
+            <div id="userPostsContainer" class="posts-container">
+                <!-- سيتم عرض منشورات المستخدم هنا -->
+            </div>
+        </div>
+        
+        <!-- صفحة المهام اليومية -->
+        <div id="dailyTasksPage" style="display: none;">
+            <div class="daily-tasks">
+                <h3><i class="fas fa-tasks"></i> المهام اليومية</h3>
+                <div id="dailyTasksList">
+                    <!-- سيتم ملء المهام اليومية هنا ديناميكيًا -->
+                </div>
+            </div>
+            
+            <h3 class="user-posts-title">آخر المنشورات</h3>
+            <div id="dailyTasksPosts" class="posts-container">
+                <!-- سيتم عرض بعض المنشورات هنا -->
+            </div>
+        </div>
+        
+        <!-- صفحة التحديات -->
+        <div id="challengesPage" style="display: none;">
+            <div class="challenges-container">
+                <h3><i class="fas fa-trophy"></i> التحديات الحالية</h3>
+                <div id="challengesList">
+                    <!-- سيتم ملء التحديات هنا ديناميكيًا -->
+                </div>
+            </div>
+            
+            <h3 class="user-posts-title">أفضل المشاركين</h3>
+            <div id="challengesParticipants" class="posts-container">
+                <!-- سيتم عرض بعض المشاركين هنا -->
+            </div>
+        </div>
+        
+        <!-- صفحة المتصدرين -->
+        <div id="leaderboardPage" style="display: none;">
+            <div class="leaderboard">
+                <h3><i class="fas fa-medal"></i> لوحة المتصدرين</h3>
+                <div id="leaderboardList">
+                    <!-- سيتم ملء المتصدرين هنا ديناميكيًا -->
+                </div>
+            </div>
+            
+            <h3 class="user-posts-title">أحدث المنشورات</h3>
+            <div id="leaderboardPosts" class="posts-container">
+                <!-- سيتم عرض بعض المنشورات هنا -->
+            </div>
+        </div>
+    </main>
+
+    <!-- نافذة إضافة منشور -->
+    <div class="modal" id="addPostModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة منشور جديد</h3>
+                <button class="close-modal" onclick="closeModal('addPostModal')">&times;</button>
+            </div>
+            <form id="addPostForm">
+                <div class="form-group">
+                    <label for="postContent">المحتوى:</label>
+                    <textarea id="postContent" class="form-control" placeholder="اكتب محتوى المنشور هنا..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="postMedia">رابط الفيديو (اختياري):</label>
+                    <input type="url" id="postMedia" class="form-control" placeholder="رابط يوتيوب فقط">
+                    <small style="color:#777;">يجب أن يكون الرابط خاص بفيديو يوتيوب</small>
+                </div>
+                <button type="submit" class="submit-btn" id="submitPostBtn">نشر</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة تحويل النقاط -->
+    <div class="modal" id="transferPointsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">تحويل النقاط</h3>
+                <button class="close-modal" onclick="closeModal('transferPointsModal')">&times;</button>
+            </div>
+            <form id="transferPointsForm" class="transfer-form">
+                <div class="form-group">
+                    <label for="receiverId">ID المستلم:</label>
+                    <input type="text" id="receiverId" class="form-control" required placeholder="أدخل ID المستلم">
+                    <small>يمكنك الحصول على ID المستلم من ملفه الشخصي</small>
+                </div>
+                <div class="form-group">
+                    <label for="pointsAmount">المبلغ:</label>
+                    <input type="number" id="pointsAmount" class="form-control" required min="1" placeholder="أدخل عدد النقاط">
+                </div>
+                <button type="submit" class="submit-btn">تحويل</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة التسجيل -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">تسجيل حساب جديد</h3>
+                <button class="close-modal" onclick="closeModal('registerModal')">&times;</button>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="newUsername">اسم المستخدم:</label>
+                    <input type="text" id="newUsername" class="form-control" required placeholder="اختر اسم مستخدم">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">كلمة المرور:</label>
+                    <input type="password" id="newPassword" class="form-control" required placeholder="اختر كلمة مرور">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">تأكيد كلمة المرور:</label>
+                    <input type="password" id="confirmPassword" class="form-control" required placeholder="أعد إدخال كلمة المرور">
+                </div>
+                <button type="submit" class="submit-btn" id="registerBtn">تسجيل</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة لوحة التحكم -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">لوحة التحكم</h3>
+                <button class="close-modal" onclick="closeModal('adminModal')">&times;</button>
+            </div>
+            <div id="adminContent">
+                <h4>إدارة المستخدمين</h4>
+                <div id="usersList" class="users-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة الدردشة مع مستخدم -->
+    <div class="modal" id="startChatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">بدء محادثة جديدة</h3>
+                <button class="close-modal" onclick="closeModal('startChatModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="chatUserId">ID المستخدم:</label>
+                <input type="text" id="chatUserId" class="form-control" required placeholder="أدخل ID المستخدم">
+            </div>
+            <button onclick="startNewChat()" class="submit-btn">بدء المحادثة</button>
+        </div>
+    </div>
+
+    <script>
+        // البيانات والمتغيرات العامة
+        let allPosts = [];
+        let allUsers = [];
+        let allNotifications = [];
+        let allChats = [];
+        let allDailyTasks = [];
+        let allChallenges = [];
+        let currentUser = null;
+        let currentChat = null;
+        let isLoading = false;
+        let isFetching = false;
+        let notificationInterval = null;
+        let chatInterval = null;
+        const GOOGLE_SHEET_ID = '1twPpOjTBaSp-Em3ijNjR4zvAiF1nQkVDdcEC8F5eg3A';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYLDimojBnkv1kY02bd3lt9bjmiorO3YdBVRiw6Lzz9dhkyJDRvPcSW-lffN8x0nmjuQ/exec';
+        const ADMIN_USERNAME = 'admin';
+        const POSTS_PER_PAGE = 10;
+        let currentPage = 1;
+        
+        // توليد ID عشوائي مكون من 15 رقم
+        function generateId() {
+            return Math.floor(100000000000000 + Math.random() * 900000000000000).toString();
+        }
+        
+        // تحويل روابط اليوتيوب لتكون قابلة للتضمين
+        function parseVideoUrl(url) {
+            if (!url) return null;
+            
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            
+            if (match && match[2].length === 11) {
+                return `https://www.youtube.com/embed/${match[2]}?rel=0&showinfo=0`;
+            }
+            
+            if (url.includes("youtube.com/embed/")) {
+                return url.split('?')[0] + '?rel=0&showinfo=0';
+            }
+            
+            return null;
+        }
+
+        // التحقق من أن الرابط هو يوتيوب
+        function isYoutubeUrl(url) {
+            if (!url) return false;
+            return url.includes("youtube.com") || url.includes("youtu.be");
+        }
+        
+        // جلب البيانات من Google Sheets
+        async function fetchData() {
+            if (isFetching) return;
+            isFetching = true;
+            
+            try {
+                showAlert('جاري تحميل البيانات...', 'info');
+                document.getElementById('loadingMore').style.display = 'block';
+                
+                const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=xlsx`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`فشل في جلب البيانات: ${response.status}`);
+                }
+                
+                const data = await response.arrayBuffer();
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                // جلب بيانات المنشورات
+                const postsSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const postsData = XLSX.utils.sheet_to_json(postsSheet, { header: 1, defval: "", blankrows: false });
+                
+                allPosts = [];
+                for (let i = 1; i < postsData.length; i++) {
+                    const row = postsData[i];
+                    if (row && (row[0] || row[1] || row[2] || row[6])) {
+                        allPosts.push({
+                            id: row[0]?.toString().trim() || generateId(),
+                            content: row[1]?.toString().trim() || "",
+                            mediaUrl: row[2]?.toString().trim() || "",
+                            mediaType: row[3]?.toString().trim() || "",
+                            likes: parseInt(row[4]) || 0,
+                            comments: row[5]?.toString().trim() || "",
+                            ownerId: row[6]?.toString().trim() || "",
+                            date: row[7]?.toString().trim() || new Date().toISOString(),
+                            likedBy: row[8]?.toString().trim()?.split(',') || []
+                        });
+                    }
+                }
+                
+                // جلب بيانات المستخدمين
+                const usersSheet = workbook.Sheets["المستخدمين"] || workbook.Sheets[workbook.SheetNames[1]];
+                allUsers = [];
+                
+                if (usersSheet) {
+                    const usersData = XLSX.utils.sheet_to_json(usersSheet, { header: 1, defval: "", blankrows: false });
+                    
+                    for (let i = 1; i < usersData.length; i++) {
+                        const row = usersData[i];
+                        if (row && row[0] && row[1]) {
+                            allUsers.push({
+                                id: row[0].toString().trim(),
+                                username: row[1].toString().trim(),
+                                password: row[2]?.toString().trim() || "",
+                                points: parseInt(row[3]) || 0,
+                                date: row[4]?.toString().trim() || "",
+                                lastActive: row[5]?.toString().trim() || ""
+                            });
+                        }
+                    }
+                }
+                
+                // جلب بيانات الإشعارات
+                const notificationsSheet = workbook.Sheets["الإشعارات"] || workbook.Sheets[workbook.SheetNames[2]];
+                allNotifications = [];
+                
+                if (notificationsSheet) {
+                    const notificationsData = XLSX.utils.sheet_to_json(notificationsSheet, { header: 1, defval: "", blankrows: false });
+                    
+                    for (let i = 1; i < notificationsData.length; i++) {
+                        const row = notificationsData[i];
+                        if (row && row[0] && row[1]) {
+                            allNotifications.push({
+                                id: row[0].toString().trim(),
+                                userId: row[1].toString().trim(),
+                                title: row[2]?.toString().trim() || "",
+                                content: row[3]?.toString().trim() || "",
+                                date: row[4]?.toString().trim() || new Date().toISOString(),
+                                isRead: row[5]?.toString().trim() === "true" || false,
+                                relatedPost: row[6]?.toString().trim() || ""
+                            });
+                        }
+                    }
+                }
+                
+                // جلب بيانات الدردشات
+                const chatsSheet = workbook.Sheets["الدردشات"] || workbook.Sheets[workbook.SheetNames[3]];
+                allChats = [];
+                
+                if (chatsSheet) {
+                    const chatsData = XLSX.utils.sheet_to_json(chatsSheet, { header: 1, defval: "", blankrows: false });
+                    
+                    for (let i = 1; i < chatsData.length; i++) {
+                        const row = chatsData[i];
+                        if (row && row[0] && row[1]) {
+                            allChats.push({
+                                id: row[0].toString().trim(),
+                                user1: row[1].toString().trim(),
+                                user2: row[2].toString().trim(),
+                                messages: row[3]?.toString().trim() || "",
+                                lastMessage: row[4]?.toString().trim() || ""
+                            });
+                        }
+                    }
+                }
+                
+                // جلب بيانات المهام اليومية
+                const tasksSheet = workbook.Sheets["المهام_اليومية"] || workbook.Sheets[workbook.SheetNames[4]];
+                allDailyTasks = [];
+                
+                if (tasksSheet) {
+                    const tasksData = XLSX.utils.sheet_to_json(tasksSheet, { header: 1, defval: "", blankrows: false });
+                    
+                    for (let i = 1; i < tasksData.length; i++) {
+                        const row = tasksData[i];
+                        if (row && row[0]) {
+                            allDailyTasks.push({
+                                id: row[0].toString().trim(),
+                                title: row[1]?.toString().trim() || "",
+                                description: row[2]?.toString().trim() || "",
+                                reward: parseInt(row[3]) || 0,
+                                isCompleted: row[4]?.toString().trim() === "true" || false,
+                                completedBy: row[5]?.toString().trim()?.split(',') || []
+                            });
+                        }
+                    }
+                }
+                
+                // جلب بيانات التحديات
+                const challengesSheet = workbook.Sheets["التحديات"] || workbook.Sheets[workbook.SheetNames[5]];
+                allChallenges = [];
+                
+                if (challengesSheet) {
+                    const challengesData = XLSX.utils.sheet_to_json(challengesSheet, { header: 1, defval: "", blankrows: false });
+                    
+                    for (let i = 1; i < challengesData.length; i++) {
+                        const row = challengesData[i];
+                        if (row && row[0]) {
+                            allChallenges.push({
+                                id: row[0].toString().trim(),
+                                title: row[1]?.toString().trim() || "",
+                                description: row[2]?.toString().trim() || "",
+                                reward: parseInt(row[3]) || 0,
+                                participants: row[4]?.toString().trim()?.split(',') || [],
+                                startDate: row[5]?.toString().trim() || "",
+                                endDate: row[6]?.toString().trim() || ""
+                            });
+                        }
+                    }
+                }
+                
+                displayPosts(allPosts);
+                updateNotifications();
+                showAlert('تم تحميل البيانات بنجاح', 'success');
+                
+            } catch (error) {
+                console.error("حدث خطأ أثناء تحميل البيانات:", error);
+                showAlert('حدث خطأ أثناء تحميل البيانات: ' + error.message, 'error');
+            } finally {
+                isFetching = false;
+                document.getElementById('loadingMore').style.display = 'none';
+            }
+        }
+
+        // عرض المنشورات في الصفحة
+        function displayPosts(posts) {
+            const postsContainer = document.getElementById('postsContainer');
+            
+            if (currentPage === 1) {
+                postsContainer.innerHTML = '';
+            }
+            
+            if (!posts || posts.length === 0) {
+                if (currentPage === 1) {
+                    postsContainer.innerHTML = `
+                        <div class="post-card">
+                            <div class="post-media empty">
+                                <div class="media-placeholder">لا توجد منشورات لعرضها</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                return;
+            }
+            
+            const sortedPosts = [...posts].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedPosts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.className = 'post-card fade-in';
+                
+                let mediaContent = '';
+                if (post.mediaUrl && isYoutubeUrl(post.mediaUrl)) {
+                    const videoUrl = parseVideoUrl(post.mediaUrl);
+                    if (videoUrl) {
+                        mediaContent = `
+                            <div class="video-container">
+                                <iframe src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        `;
+                    }
+                }
+                
+                let textContent = '';
+                if (post.content) {
+                    textContent = `<div class="post-text">${post.content}</div>`;
+                }
+                
+                if (!mediaContent && post.content) {
+                    mediaContent = `<div class="post-media empty"><div class="media-placeholder">${post.content}</div></div>`;
+                } else if (!mediaContent) {
+                    mediaContent = '<div class="post-media empty"><div class="media-placeholder">لا يوجد محتوى وسائط</div></div>';
+                }
+                
+                const owner = allUsers.find(user => user.id === post.ownerId) || {};
+                const isLiked = currentUser && post.likedBy && post.likedBy.includes(currentUser.id);
+                const commentsCount = post.comments ? post.comments.split('\n').length : 0;
+                const canDelete = currentUser && (currentUser.id === post.ownerId || currentUser.username === ADMIN_USERNAME);
+                
+                postElement.innerHTML = `
+                    ${mediaContent}
+                    <div class="post-content">
+                        ${textContent}
+                        <div class="post-owner">
+                            <div class="post-owner-avatar">${owner.username ? owner.username.charAt(0).toUpperCase() : '?'}</div>
+                            نشر بواسطة: ${owner.username || 'مستخدم غير معروف'} | ${formatDate(post.date)}
+                        </div>
+                        <div class="post-actions">
+                            <button class="post-action" onclick="likePost('${post.id}')" style="color: ${isLiked ? '#e74c3c' : '#3498db'}">
+                                <i class="fas fa-thumbs-up"></i> أعجبني (${post.likes})
+                            </button>
+                            <button class="post-action" onclick="toggleComments('${post.id}')">
+                                <i class="fas fa-comment"></i> تعليقات (${commentsCount})
+                            </button>
+                            ${canDelete ? `
+                            <button class="delete-btn" onclick="deletePost('${post.id}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                            ` : ''}
+                            ${currentUser && currentUser.id !== post.ownerId ? `
+                            <button class="post-action" onclick="startChatWithUser('${post.ownerId}')">
+                                <i class="fas fa-comment-dots"></i> محادثة
+                            </button>
+                            ` : ''}
+                        </div>
+                        <div class="comments-section" id="comments-${post.id}" style="display:none;">
+                            <div class="comments-list" id="comments-list-${post.id}">
+                                ${post.comments ? post.comments.split('\n').map((c, i) => {
+                                    const commentParts = c.split(':');
+                                    const commentOwner = commentParts[0];
+                                    const commentText = commentParts.slice(1).join(':');
+                                    const commentUser = allUsers.find(u => u.username === commentOwner) || {};
+                                    const canDeleteComment = currentUser && (currentUser.username === commentOwner || currentUser.username === ADMIN_USERNAME);
+                                    
+                                    return `
+                                        <div class="comment">
+                                            <div class="comment-header">
+                                                <div class="comment-user">
+                                                    <div class="comment-user-avatar">${commentOwner.charAt(0).toUpperCase()}</div>
+                                                    ${commentOwner}
+                                                </div>
+                                                ${canDeleteComment ? `
+                                                <div class="comment-actions">
+                                                    <button onclick="deleteComment('${post.id}', ${i})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                            <div class="comment-text">${commentText}</div>
+                                            <div class="comment-time">${formatDate(post.date)}</div>
+                                        </div>
+                                    `;
+                                }).join('') : '<div class="comment-text">لا توجد تعليقات</div>'}
+                            </div>
+                            ${currentUser ? `
+                            <div class="add-comment">
+                                <textarea class="form-control" id="comment-text-${post.id}" placeholder="أضف تعليقك..."></textarea>
+                                <button class="submit-btn" onclick="addComment('${post.id}')">إرسال</button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                postsContainer.appendChild(postElement);
+            });
+        }
+
+        // عرض منشورات المستخدم في صفحة الملف الشخصي
+        function displayUserPosts(userId) {
+            const userPostsContainer = document.getElementById('userPostsContainer');
+            userPostsContainer.innerHTML = '';
+            
+            const userPosts = allPosts.filter(post => post.ownerId === userId);
+            
+            if (userPosts.length === 0) {
+                userPostsContainer.innerHTML = `
+                    <div class="post-card">
+                        <div class="post-media empty">
+                            <div class="media-placeholder">لا توجد منشورات لعرضها</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const sortedPosts = [...userPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedPosts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.className = 'post-card fade-in';
+                
+                let mediaContent = '';
+                if (post.mediaUrl && isYoutubeUrl(post.mediaUrl)) {
+                    const videoUrl = parseVideoUrl(post.mediaUrl);
+                    if (videoUrl) {
+                        mediaContent = `
+                            <div class="video-container">
+                                <iframe src="${videoUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        `;
+                    }
+                }
+                
+                let textContent = '';
+                if (post.content) {
+                    textContent = `<div class="post-text">${post.content}</div>`;
+                }
+                
+                if (!mediaContent && post.content) {
+                    mediaContent = `<div class="post-media empty"><div class="media-placeholder">${post.content}</div></div>`;
+                } else if (!mediaContent) {
+                    mediaContent = '<div class="post-media empty"><div class="media-placeholder">لا يوجد محتوى وسائط</div></div>';
+                }
+                
+                const owner = allUsers.find(user => user.id === post.ownerId) || {};
+                const isLiked = currentUser && post.likedBy && post.likedBy.includes(currentUser.id);
+                const commentsCount = post.comments ? post.comments.split('\n').length : 0;
+                
+                postElement.innerHTML = `
+                    ${mediaContent}
+                    <div class="post-content">
+                        ${textContent}
+                        <div class="post-owner">
+                            <div class="post-owner-avatar">${owner.username ? owner.username.charAt(0).toUpperCase() : '?'}</div>
+                            ${formatDate(post.date)}
+                        </div>
+                        <div class="post-actions">
+                            <button class="post-action" onclick="likePost('${post.id}')" style="color: ${isLiked ? '#e74c3c' : '#3498db'}">
+                                <i class="fas fa-thumbs-up"></i> أعجبني (${post.likes})
+                            </button>
+                            <button class="post-action" onclick="toggleComments('${post.id}')">
+                                <i class="fas fa-comment"></i> تعليقات (${commentsCount})
+                            </button>
+                            <button class="delete-btn" onclick="deletePost('${post.id}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
+                        </div>
+                        <div class="comments-section" id="comments-${post.id}" style="display:none;">
+                            <div class="comments-list" id="comments-list-${post.id}">
+                                ${post.comments ? post.comments.split('\n').map((c, i) => {
+                                    const commentParts = c.split(':');
+                                    const commentOwner = commentParts[0];
+                                    const commentText = commentParts.slice(1).join(':');
+                                    const commentUser = allUsers.find(u => u.username === commentOwner) || {};
+                                    const canDeleteComment = currentUser && (currentUser.username === commentOwner || currentUser.username === ADMIN_USERNAME);
+                                    
+                                    return `
+                                        <div class="comment">
+                                            <div class="comment-header">
+                                                <div class="comment-user">
+                                                    <div class="comment-user-avatar">${commentOwner.charAt(0).toUpperCase()}</div>
+                                                    ${commentOwner}
+                                                </div>
+                                                ${canDeleteComment ? `
+                                                <div class="comment-actions">
+                                                    <button onclick="deleteComment('${post.id}', ${i})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                            <div class="comment-text">${commentText}</div>
+                                            <div class="comment-time">${formatDate(post.date)}</div>
+                                        </div>
+                                    `;
+                                }).join('') : '<div class="comment-text">لا توجد تعليقات</div>'}
+                            </div>
+                            ${currentUser ? `
+                            <div class="add-comment">
+                                <textarea class="form-control" id="comment-text-${post.id}" placeholder="أضف تعليقك..."></textarea>
+                                <button class="submit-btn" onclick="addComment('${post.id}')">إرسال</button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                userPostsContainer.appendChild(postElement);
+            });
+        }
+
+        // عرض صفحة الملف الشخصي
+        function showProfilePage() {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            document.getElementById('profileAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = currentUser.username;
+            document.getElementById('profileId').textContent = currentUser.id;
+            document.getElementById('profilePoints').textContent = currentUser.points;
+            
+            displayUserPosts(currentUser.id);
+            
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('profilePage').style.display = 'block';
+            document.getElementById('dailyTasksPage').style.display = 'none';
+            document.getElementById('challengesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('profileLink').classList.add('active');
+        }
+
+        // عرض الصفحة الرئيسية
+        function showHomePage() {
+            document.getElementById('homePage').style.display = 'block';
+            document.getElementById('profilePage').style.display = 'none';
+            document.getElementById('dailyTasksPage').style.display = 'none';
+            document.getElementById('challengesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('homeLink').classList.add('active');
+        }
+
+        // عرض صفحة المهام اليومية
+        function showDailyTasks() {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            document.getElementById('dailyTasksList').innerHTML = '';
+            
+            allDailyTasks.forEach(task => {
+                const isCompleted = task.completedBy.includes(currentUser.id);
+                const taskElement = document.createElement('div');
+                taskElement.className = 'task-item';
+                
+                taskElement.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" ${isCompleted ? 'checked' : ''} 
+                        onclick="completeDailyTask('${task.id}', this.checked)">
+                    <div class="task-info">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-reward">مكافأة: ${task.reward} نقطة</div>
+                        ${isCompleted ? '<div class="task-completed">تم إكمال المهمة</div>' : ''}
+                    </div>
+                `;
+                
+                document.getElementById('dailyTasksList').appendChild(taskElement);
+            });
+            
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('profilePage').style.display = 'none';
+            document.getElementById('dailyTasksPage').style.display = 'block';
+            document.getElementById('challengesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('dailyTasksLink').classList.add('active');
+        }
+
+        // عرض صفحة التحديات
+        function showChallenges() {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            document.getElementById('challengesList').innerHTML = '';
+            
+            allChallenges.forEach(challenge => {
+                const isParticipating = challenge.participants.includes(currentUser.id);
+                const challengeElement = document.createElement('div');
+                challengeElement.className = 'challenge-card';
+                
+                challengeElement.innerHTML = `
+                    <div class="challenge-title">${challenge.title}</div>
+                    <div class="challenge-description">${challenge.description}</div>
+                    <div class="challenge-reward">جائزة: ${challenge.reward} نقطة</div>
+                    <div class="challenge-participants">عدد المشاركين: ${challenge.participants.length}</div>
+                    <button class="challenge-btn" onclick="joinChallenge('${challenge.id}')">
+                        ${isParticipating ? 'مشارك بالفعل' : 'انضم إلى التحدي'}
+                    </button>
+                `;
+                
+                document.getElementById('challengesList').appendChild(challengeElement);
+            });
+            
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('profilePage').style.display = 'none';
+            document.getElementById('dailyTasksPage').style.display = 'none';
+            document.getElementById('challengesPage').style.display = 'block';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('challengesLink').classList.add('active');
+        }
+
+        // عرض صفحة المتصدرين
+        function showLeaderboard() {
+            document.getElementById('leaderboardList').innerHTML = '';
+            
+            // ترتيب المستخدمين حسب النقاط
+            const sortedUsers = [...allUsers].sort((a, b) => b.points - a.points);
+            
+            sortedUsers.slice(0, 10).forEach((user, index) => {
+                const leaderboardItem = document.createElement('div');
+                leaderboardItem.className = 'leaderboard-item';
+                
+                leaderboardItem.innerHTML = `
+                    <div class="leaderboard-rank ${index < 3 ? 'top' : ''}">${index + 1}</div>
+                    <div class="leaderboard-user">
+                        <div class="leaderboard-avatar">${user.username.charAt(0).toUpperCase()}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${user.username}</div>
+                            <div class="leaderboard-points">${user.points} نقطة</div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('leaderboardList').appendChild(leaderboardItem);
+            });
+            
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('profilePage').style.display = 'none';
+            document.getElementById('dailyTasksPage').style.display = 'none';
+            document.getElementById('challengesPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'block';
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.getElementById('leaderboardLink').classList.add('active');
+        }
+
+        // إكمال المهمة اليومية
+        async function completeDailyTask(taskId, isCompleted) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "completeDailyTask",
+                        taskId: taskId,
+                        userId: currentUser.id,
+                        isCompleted: isCompleted
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === "success") {
+                    showAlert(isCompleted ? 'تم إكمال المهمة بنجاح!' : 'تم إلغاء إكمال المهمة', 'success');
+                    fetchData();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error("خطأ في إكمال المهمة:", error);
+                showAlert('حدث خطأ أثناء إكمال المهمة: ' + error.message, 'error');
+            }
+        }
+
+        // الانضمام إلى التحدي
+        async function joinChallenge(challengeId) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "joinChallenge",
+                        challengeId: challengeId,
+                        userId: currentUser.id
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === "success") {
+                    showAlert('تم الانضمام إلى التحدي بنجاح!', 'success');
+                    fetchData();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error("خطأ في الانضمام إلى التحدي:", error);
+                showAlert('حدث خطأ أثناء الانضمام إلى التحدي: ' + error.message, 'error');
+            }
+        }
+
+        // تبديل عرض/إخفاء التعليقات
+        function toggleComments(postId) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            if (commentsSection.style.display === 'none') {
+                commentsSection.style.display = 'block';
+            } else {
+                commentsSection.style.display = 'none';
+            }
+        }
+
+        // إضافة تعليق جديد
+        async function addComment(postId) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            const commentText = document.getElementById(`comment-text-${postId}`).value.trim();
+            if (!commentText) {
+                showAlert('الرجاء إدخال نص التعليق', 'error');
+                return;
+            }
+            
+            try {
+                const newComment = `${currentUser.username}: ${commentText}`;
+                const postIndex = allPosts.findIndex(p => p.id === postId);
+                
+                if (postIndex === -1) throw new Error("المنشور غير موجود");
+                
+                allPosts[postIndex].comments = allPosts[postIndex].comments ?
+                    `${allPosts[postIndex].comments}\n${newComment}` :
+                    newComment;
+                
+                // إرسال إشعار لصاحب المنشور إذا لم يكن هو نفسه
+                const postOwner = allPosts[postIndex].ownerId;
+                if (postOwner !== currentUser.id) {
+                    await sendNotification(postOwner, 'تعليق جديد', `${currentUser.username} علق على منشورك`, postId);
+                }
+                
+                const commentsList = document.getElementById(`comments-list-${postId}`);
+                const commentElement = document.createElement('div');
+                commentElement.className = 'comment fade-in';
+                
+                commentElement.innerHTML = `
+                    <div class="comment-header">
+                        <div class="comment-user">
+                            <div class="comment-user-avatar">${currentUser.username.charAt(0).toUpperCase()}</div>
+                            ${currentUser.username}
+                        </div>
+                        <div class="comment-actions">
+                            <button onclick="deleteComment('${postId}', ${allPosts[postIndex].comments.split('\n').length - 1})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="comment-text">${commentText}</div>
+                    <div class="comment-time">${formatDate(new Date().toISOString())}</div>
+                `;
+                
+                commentsList.appendChild(commentElement);
+                document.getElementById(`comment-text-${postId}`).value = '';
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "addComment",
+                        postId: postId,
+                        comment: newComment,
+                        userId: currentUser.id
+                    })
+                });
+                
+                if (!response.ok) throw new Error("فشل في الاتصال بالسيرفر");
+                
+                const result = await response.json();
+                if (result.status !== "success") throw new Error(result.message || "فشل في حفظ التعليق");
+                
+            } catch (error) {
+                console.error("خطأ التعليق:", {
+                    error: error.message,
+                    postId: postId,
+                    user: currentUser.id
+                });
+                showAlert('حدث خطأ أثناء إضافة التعليق', 'error');
+            }
+        }
+
+        // حذف تعليق
+        async function deleteComment(postId, commentIndex) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+
+            try {
+                const confirmDelete = confirm("هل أنت متأكد أنك تريد حذف هذا التعليق؟");
+                if (!confirmDelete) return;
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "deleteComment",
+                        postId: postId,
+                        index: commentIndex,
+                        userId: currentUser.id,
+                        username: currentUser.username
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    showAlert('تم حذف التعليق بنجاح', 'success');
+                    fetchData();
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (e) {
+                console.error("خطأ حذف التعليق:", e);
+                showAlert("حدث خطأ في الاتصال بالخادم", "error");
+            }
+        }
+
+        // حذف منشور
+        async function deletePost(postId) {
+            if (!currentUser) return showAlert('يجب تسجيل الدخول أولاً', 'error');
+
+            const confirmDelete = confirm("هل أنت متأكد من حذف هذا المنشور؟");
+            if (!confirmDelete) return;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        action: 'deletePost',
+                        postId: postId,
+                        username: currentUser.username
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    showAlert('تم حذف المنشور بنجاح', 'success');
+                    fetchData();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('حدث خطأ أثناء حذف المنشور', 'error');
+            }
+        }
+
+        // تنسيق التاريخ
+        function formatDate(dateString) {
+            if (!dateString) return 'تاريخ غير معروف';
+            
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // تحديث معلومات المستخدم في القائمة الجانبية
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.username;
+                document.getElementById('userPoints').textContent = currentUser.points;
+                document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+                document.getElementById('userId').textContent = currentUser.id;
+                
+                document.getElementById('userProfileSection').style.display = 'flex';
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'block';
+                
+                if (currentUser.username === ADMIN_USERNAME) {
+                    document.getElementById('adminPanelLink').style.display = 'block';
+                } else {
+                    document.getElementById('adminPanelLink').style.display = 'none';
+                }
+            } else {
+                document.getElementById('userProfileSection').style.display = 'none';
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('adminPanelLink').style.display = 'none';
+            }
+        }
+        
+        // تسجيل الدخول
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (!username || !password) {
+                showAlert('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error', 'loginResult');
+                return;
+            }
+            
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تسجيل الدخول...';
+                
+                await fetchData();
+                
+                const user = allUsers.find(u =>
+                    u.username.toLowerCase() === username.toLowerCase()
+                );
+                
+                if (user) {
+                    if (user.password === password) {
+                        currentUser = user;
+                        updateUserInfo();
+                        showAlert('تم تسجيل الدخول بنجاح', 'success');
+                        
+                        localStorage.setItem('currentUser', JSON.stringify(user));
+                        
+                        // بدء تحديث الإشعارات والدردشات
+                        startNotificationUpdates();
+                        startChatUpdates();
+                        
+                        if (window.innerWidth < 992) {
+                            toggleSidebar();
+                        }
+                    } else {
+                        showAlert('كلمة المرور غير صحيحة', 'error', 'loginResult');
+                    }
+                } else {
+                    showAlert('اسم المستخدم غير موجود', 'error', 'loginResult');
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                showAlert('حدث خطأ أثناء تسجيل الدخول: ' + error.message, 'error', 'loginResult');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'تسجيل الدخول';
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            updateUserInfo();
+            showAlert('تم تسجيل الخروج بنجاح', 'success');
+            showHomePage();
+            
+            // إيقاف تحديث الإشعارات والدردشات
+            stopNotificationUpdates();
+            stopChatUpdates();
+        }
+        
+        // عرض نموذج التسجيل
+        function showRegisterForm() {
+            document.getElementById('registerForm').reset();
+            openModal('registerModal');
+        }
+        
+        // تسجيل حساب جديد
+        async function register() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const registerBtn = document.getElementById('registerBtn');
+            
+            if (!username || !password || !confirmPassword) {
+                showAlert('الرجاء ملء جميع الحقول', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('كلمة المرور غير متطابقة', 'error');
+                return;
+            }
+            
+            try {
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التسجيل...';
+                
+                const userExists = allUsers.some(u => u.username === username);
+                
+                if (userExists) {
+                    showAlert('اسم المستخدم موجود بالفعل', 'error');
+                    return;
+                }
+                
+                const newUser = {
+                    id: generateId(),
+                    username: username,
+                    password: password,
+                    points: 0,
+                    date: new Date().toISOString()
+                };
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "register",
+                        id: newUser.id,
+                        username: newUser.username,
+                        password: newUser.password,
+                        points: newUser.points,
+                        date: newUser.date
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error("فشل في تسجيل الحساب");
+                }
+                
+                const result = await response.json();
+                if (result.status === "success") {
+                    allUsers.push(newUser);
+                    
+                    showAlert('تم إنشاء الحساب بنجاح، يمكنك تسجيل الدخول الآن', 'success');
+                    closeModal('registerModal');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                showAlert('حدث خطأ أثناء التسجيل: ' + error.message, 'error');
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'تسجيل';
+            }
+        }
+        
+        // إضافة منشور جديد
+        async function addPost(content, mediaUrl) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitPostBtn');
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري النشر...';
+                
+                if (mediaUrl && !isYoutubeUrl(mediaUrl)) {
+                    throw new Error("يجب أن يكون الرابط خاص بفيديو يوتيوب");
+                }
+                
+                const postData = {
+                    action: "addPost",
+                    id: generateId(),
+                    content: content,
+                    mediaUrl: mediaUrl || "",
+                    ownerId: currentUser.id,
+                    date: new Date().toISOString()
+                };
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(postData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status !== "success") {
+                    throw new Error(result.message || "فشل في نشر المنشور");
+                }
+                
+                await fetchData();
+                showAlert('تم نشر المنشور بنجاح', 'success');
+                closeModal('addPostModal');
+                document.getElementById('addPostForm').reset();
+                
+            } catch (error) {
+                console.error("Error:", error);
+                showAlert('حدث خطأ أثناء نشر المنشور: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'نشر';
+            }
+        }
+
+        // الإعجاب بالمنشور
+        async function likePost(postId) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            try {
+                const postIndex = allPosts.findIndex(p => p.id === postId);
+                if (postIndex === -1) throw new Error("المنشور غير موجود");
+                
+                if (allPosts[postIndex].likedBy.includes(currentUser.id)) {
+                    showAlert('لقد أعجبت بهذا المنشور بالفعل', 'info');
+                    return;
+                }
+                
+                const likeButtons = document.querySelectorAll(`[onclick="likePost('${postId}')"]`);
+                const currentLikes = allPosts[postIndex].likes;
+                const newLikes = currentLikes + 1;
+                
+                likeButtons.forEach(btn => {
+                    btn.innerHTML = `<i class="fas fa-thumbs-up"></i> أعجبني (${newLikes})`;
+                    btn.style.color = '#e74c3c';
+                    btn.onclick = null;
+                });
+                
+                allPosts[postIndex].likes = newLikes;
+                allPosts[postIndex].likedBy.push(currentUser.id);
+                
+                // إرسال إشعار لصاحب المنشور إذا لم يكن هو نفسه
+                const postOwner = allPosts[postIndex].ownerId;
+                if (postOwner !== currentUser.id) {
+                    await sendNotification(postOwner, 'إعجاب جديد', `${currentUser.username} أعجب بمنشورك`, postId);
+                }
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "likePost",
+                        postId: postId,
+                        userId: currentUser.id,
+                        username: currentUser.username
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status !== "success") {
+                    throw new Error(result.message || "فشل في تسجيل الإعجاب");
+                }
+                
+                showAlert('تم تسجيل إعجابك بنجاح', 'success');
+                
+            } catch (error) {
+                console.error("Error in likePost:", {
+                    error: error.message,
+                    postId: postId,
+                    user: currentUser?.id
+                });
+                showAlert('حدث خطأ أثناء تسجيل الإعجاب: ' + error.message, 'error');
+                fetchData();
+            }
+        }
+
+        // تحويل النقاط بين المستخدمين
+        async function transferPoints(receiverId, amount) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            if (currentUser.id === receiverId) {
+                showAlert('لا يمكن تحويل النقاط لنفسك', 'error');
+                return;
+            }
+            
+            if (amount <= 0 || isNaN(amount)) {
+                showAlert('المبلغ يجب أن يكون رقمًا موجبًا', 'error');
+                return;
+            }
+            
+            if (currentUser.points < amount) {
+                showAlert('لا تمتلك نقاط كافية', 'error');
+                return;
+            }
+            
+            try {
+                const receiver = allUsers.find(user => user.id === receiverId);
+                if (!receiver) throw new Error("المستخدم المستلم غير موجود");
+                
+                currentUser.points -= amount;
+                receiver.points += amount;
+                updateUserInfo();
+                
+                // إرسال إشعار للمستلم
+                await sendNotification(receiverId, 'تحويل نقاط', `تم تحويل ${amount} نقطة إليك من ${currentUser.username}`);
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "transferPoints",
+                        senderId: currentUser.id,
+                        receiverId: receiverId,
+                        amount: amount
+                    })
+                });
+                
+                if (!response.ok) throw new Error("فشل في الاتصال بالسيرفر");
+                
+                const result = await response.json();
+                if (result.status !== "success") throw new Error(result.message || "فشل في التحويل");
+                
+                showAlert(`تم تحويل ${amount} نقطة بنجاح`, 'success');
+                closeModal('transferPointsModal');
+                
+            } catch (error) {
+                console.error("خطأ التحويل:", {
+                    error: error.message,
+                    sender: currentUser.id,
+                    receiver: receiverId,
+                    amount: amount
+                });
+                showAlert('حدث خطأ: ' + error.message, 'error');
+            }
+        }
+
+        // إدارة المستخدمين (للمشرف)
+        async function showAdminPanel() {
+            if (!currentUser || currentUser.username !== ADMIN_USERNAME) {
+                showAlert('ليس لديك صلاحيات الوصول إلى لوحة التحكم', 'error');
+                return;
+            }
+            
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            allUsers.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.style.display = 'flex';
+                userItem.style.justifyContent = 'space-between';
+                userItem.style.alignItems = 'center';
+                userItem.style.marginBottom = '10px';
+                userItem.style.padding = '10px';
+                userItem.style.backgroundColor = '#f9f9f9';
+                userItem.style.borderRadius = '5px';
+                
+                userItem.innerHTML = `
+                    <div>
+                        <strong>${user.username}</strong>
+                        <div>النقاط: ${user.points} | ID: ${user.id}</div>
+                    </div>
+                    <div class="user-actions">
+                        <button class="post-action" onclick="editUserPoints('${user.id}')">
+                            <i class="fas fa-edit"></i> تعديل النقاط
+                        </button>
+                    </div>
+                `;
+                usersList.appendChild(userItem);
+            });
+            
+            openModal('adminModal');
+        }
+        
+        // تعديل نقاط المستخدم (للمشرف)
+        async function editUserPoints(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const newPoints = prompt(`أدخل عدد النقاط الجديد لـ ${user.username}:`, user.points);
+            if (newPoints === null || isNaN(newPoints)) return;
+            
+            try {
+                const oldPoints = user.points;
+                user.points = parseInt(newPoints);
+                
+                if (currentUser.id === userId) {
+                    currentUser.points = parseInt(newPoints);
+                    updateUserInfo();
+                }
+                
+                // إرسال إشعار للمستخدم
+                await sendNotification(userId, 'تعديل النقاط', `تم تعديل نقاطك إلى ${newPoints} من قبل المشرف`);
+                
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "updateUserPoints",
+                        userId: userId,
+                        points: newPoints,
+                        adminUsername: currentUser.username
+                    })
+                });
+                
+                if (!response.ok) {
+                    user.points = oldPoints;
+                    if (currentUser.id === userId) {
+                        currentUser.points = oldPoints;
+                        updateUserInfo();
+                    }
+                    throw new Error("فشل في تحديث النقاط");
+                }
+                
+                const result = await response.json();
+                if (result.status !== "success") {
+                    throw new Error(result.message);
+                }
+                
+                showAlert(`تم تحديث نقاط ${user.username} إلى ${newPoints}`, 'success');
+                showAdminPanel();
+                
+            } catch (error) {
+                console.error("Error:", error);
+                showAlert('حدث خطأ أثناء تحديث النقاط: ' + error.message, 'error');
+            }
+        }
+        
+        // نظام الإشعارات
+        function updateNotifications() {
+            if (!currentUser) return;
+            
+            const userNotifications = allNotifications
+                .filter(n => n.userId === currentUser.id)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const notificationsList = document.getElementById('notificationsList');
+            notificationsList.innerHTML = '';
+            
+            if (userNotifications.length === 0) {
+                notificationsList.innerHTML = '<div class="notification-item">لا توجد إشعارات</div>';
+                document.getElementById('notificationBadge').style.display = 'none';
+                return;
+            }
+            
+            const unreadCount = userNotifications.filter(n => !n.isRead).length;
+            
+            if (unreadCount > 0) {
+                document.getElementById('notificationBadge').textContent = unreadCount;
+                document.getElementById('notificationBadge').style.display = 'flex';
+            } else {
+                document.getElementById('notificationBadge').style.display = 'none';
+            }
+            
+            userNotifications.forEach(notification => {
+                const notificationElement = document.createElement('div');
+                notificationElement.className = `notification-item ${notification.isRead ? '' : 'unread'}`;
+                notificationElement.onclick = () => viewNotification(notification);
+                
+                notificationElement.innerHTML = `
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-content">${notification.content}</div>
+                    <div class="notification-time">${formatDate(notification.date)}</div>
+                `;
+                
+                notificationsList.appendChild(notificationElement);
+            });
+        }
+        
+        // عرض تفاصيل الإشعار
+        async function viewNotification(notification) {
+            if (!notification.isRead) {
+                // تحديث حالة الإشعار كمقروء
+                try {
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            action: "markNotificationRead",
+                            notificationId: notification.id
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.status === "success") {
+                        notification.isRead = true;
+                        updateNotifications();
+                    }
+                } catch (error) {
+                    console.error("خطأ في تحديث حالة الإشعار:", error);
+                }
+            }
+            
+            // إذا كان الإشعار مرتبطاً بمنشور، عرض المنشور
+            if (notification.relatedPost) {
+                const post = allPosts.find(p => p.id === notification.relatedPost);
+                if (post) {
+                    closeNotifications();
+                    showHomePage();
+                    
+                    // قم بالتمرير إلى المنشور وفتح التعليقات
+                    setTimeout(() => {
+                        const postElement = document.querySelector(`[onclick*="likePost('${post.id}')"]`)?.closest('.post-card');
+                        if (postElement) {
+                            postElement.scrollIntoView({ behavior: 'smooth' });
+                            toggleComments(post.id);
+                        }
+                    }, 500);
+                }
+            }
+        }
+        
+        // إرسال إشعار جديد
+        async function sendNotification(userId, title, content, relatedPost = "") {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "sendNotification",
+                        userId: userId,
+                        title: title,
+                        content: content,
+                        relatedPost: relatedPost
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === "success") {
+                    const newNotification = {
+                        id: result.data.id,
+                        userId: userId,
+                        title: title,
+                        content: content,
+                        date: new Date().toISOString(),
+                        isRead: false,
+                        relatedPost: relatedPost
+                    };
+                    
+                    allNotifications.push(newNotification);
+                    updateNotifications();
+                }
+            } catch (error) {
+                console.error("خطأ في إرسال الإشعار:", error);
+            }
+        }
+        
+        // بدء التحديث التلقائي للإشعارات
+        function startNotificationUpdates() {
+            stopNotificationUpdates();
+            notificationInterval = setInterval(() => {
+                fetchData();
+            }, 10000); // كل 10 ثواني
+        }
+        
+        // إيقاف التحديث التلقائي للإشعارات
+        function stopNotificationUpdates() {
+            if (notificationInterval) {
+                clearInterval(notificationInterval);
+                notificationInterval = null;
+            }
+        }
+        
+        // فتح نافذة الإشعارات
+        function openNotifications() {
+            document.getElementById('notificationsContainer').classList.add('open');
+        }
+        
+        // إغلاق نافذة الإشعارات
+        function closeNotifications() {
+            document.getElementById('notificationsContainer').classList.remove('open');
+        }
+        
+        // نظام الدردشة
+        function startChatWithUser(userId) {
+            if (!currentUser) {
+                showAlert('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            if (currentUser.id === userId) {
+                showAlert('لا يمكن بدء محادثة مع نفسك', 'info');
+                return;
+            }
+            
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) {
+                showAlert('المستخدم غير موجود', 'error');
+                return;
+            }
+            
+            // البحث عن دردشة موجودة
+            const existingChat = allChats.find(chat => 
+                (chat.user1 === currentUser.id && chat.user2 === userId) ||
+                (chat.user1 === userId && chat.user2 === currentUser.id)
+            );
+            
+            if (existingChat) {
+                openChat(existingChat);
+            } else {
+                currentChat = {
+                    id: generateId(),
+                    user1: currentUser.id,
+                    user2: userId,
+                    messages: "",
+                    lastMessage: ""
+                };
+                
+                document.getElementById('chatWithUser').textContent = user.username;
+                document.getElementById('chatMessages').innerHTML = '<div class="message">لا توجد رسائل بعد</div>';
+                document.getElementById('chatContainer').classList.add('open');
+            }
+        }
+        
+        // فتح دردشة
+        function openChat(chat) {
+            currentChat = chat;
+            const otherUserId = chat.user1 === currentUser.id ? chat.user2 : chat.user1;
+            const otherUser = allUsers.find(u => u.id === otherUserId);
+            
+            document.getElementById('chatWithUser').textContent = otherUser.username;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            if (chat.messages) {
+                chat.messages.split('\n').forEach(msg => {
+                    const messageParts = msg.split(':');
+                    const senderId = messageParts[0];
+                    const messageContent = messageParts.slice(1).join(':');
+                    
+                    const messageElement = document.createElement('div');
+                    messageElement.className = `message ${senderId === currentUser.id ? 'me' : ''}`;
+                    
+                    messageElement.innerHTML = `
+                        <div class="message-sender">${senderId === currentUser.id ? 'أنت' : otherUser.username}</div>
+                        <div class="message-content">${messageContent}</div>
+                        <div class="message-time">${formatDate(new Date().toISOString())}</div>
+                    `;
+                    
+                    chatMessages.appendChild(messageElement);
+                });
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else {
+                chatMessages.innerHTML = '<div class="message">لا توجد رسائل بعد</div>';
+            }
+            
+            document.getElementById('chatContainer').classList.add('open');
+        }
+        
+        // إرسال رسالة
+        async function sendMessage() {
+            if (!currentChat || !currentUser) return;
+            
+            const messageInput = document.getElementById('chatMessageInput');
+            const messageText = messageInput.value.trim();
+            
+            if (!messageText) return;
+            
+            try {
+                const newMessage = `${currentUser.id}:${messageText}`;
+                const chatMessages = document.getElementById('chatMessages');
+                
+                // إضافة الرسالة محلياً
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message me';
+                
+                messageElement.innerHTML = `
+                    <div class="message-sender">أنت</div>
+                    <div class="message-content">${messageText}</div>
+                    <div class="message-time">${formatDate(new Date().toISOString())}</div>
+                `;
+                
+                chatMessages.appendChild(messageElement);
+                messageInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // تحديث الدردشة في البيانات المحلية
+                currentChat.messages = currentChat.messages ? 
+                    `${currentChat.messages}\n${newMessage}` : 
+                    newMessage;
+                currentChat.lastMessage = new Date().toISOString();
+                
+                // إرسال الإشعار للمستخدم الآخر
+                const otherUserId = currentChat.user1 === currentUser.id ? currentChat.user2 : currentChat.user1;
+                await sendNotification(otherUserId, 'رسالة جديدة', `${currentUser.username} أرسل لك رسالة`);
+                
+                // حفظ الرسالة في السيرفر
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: "sendMessage",
+                        chatId: currentChat.id,
+                        senderId: currentUser.id,
+                        receiverId: otherUserId,
+                        message: messageText
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status !== "success") {
+                    throw new Error(result.message || "فشل في إرسال الرسالة");
+                }
+                
+            } catch (error) {
+                console.error("خطأ في إرسال الرسالة:", error);
+                showAlert('حدث خطأ أثناء إرسال الرسالة', 'error');
+            }
+        }
+        
+        // بدء التحديث التلقائي للدردشات
+        function startChatUpdates() {
+            stopChatUpdates();
+            chatInterval = setInterval(() => {
+                fetchData();
+                
+                // إذا كانت هناك دردشة مفتوحة، تحقق من وجود رسائل جديدة
+                if (currentChat) {
+                    const chat = allChats.find(c => c.id === currentChat.id);
+                    if (chat && chat.messages !== currentChat.messages) {
+                        openChat(chat);
+                    }
+                }
+            }, 100000); // كل 10 ثواني
+        }
+        
+        // إيقاف التحديث التلقائي للدردشات
+        function stopChatUpdates() {
+            if (chatInterval) {
+                clearInterval(chatInterval);
+                chatInterval = null;
+            }
+        }
+        
+        // فتح نافذة منبثقة
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        // إغلاق نافذة منبثقة
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // عرض تنبيه
+        function showAlert(message, type, elementId = null) {
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${type} fade-in`;
+            
+            let icon = '';
+            if (type === 'success') icon = '<i class="fas fa-check-circle"></i>';
+            else if (type === 'error') icon = '<i class="fas fa-exclamation-circle"></i>';
+            else icon = '<i class="fas fa-info-circle"></i>';
+            
+            alertElement.innerHTML = `${icon} ${message}`;
+            
+            if (elementId) {
+                const container = document.getElementById(elementId);
+                container.innerHTML = '';
+                container.appendChild(alertElement);
+            } else {
+                const alertContainer = document.getElementById('alertContainer');
+                alertContainer.innerHTML = '';
+                alertContainer.appendChild(alertElement);
+                
+                setTimeout(() => {
+                    alertElement.remove();
+                }, 5000);
+            }
+        }
+        
+        // فتح/إغلاق القائمة الجانبية
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            if (sidebar.classList.contains('open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // تحميل المزيد من المنشورات عند التمرير
+        function setupInfiniteScroll() {
+            window.addEventListener('scroll', () => {
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+                    if (allPosts.length > currentPage * POSTS_PER_PAGE) {
+                        isLoading = true;
+                        displayPosts(allPosts.slice(0, (currentPage + 1) * POSTS_PER_PAGE));
+                        currentPage++;
+                        isLoading = false;
+                    }
+                }
+            });
+        }
+        
+        // تهيئة الصفحة عند التحميل
+        window.onload = function() {
+            // أحداث القائمة الجانبية
+            document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
+            document.getElementById('closeSidebar').addEventListener('click', toggleSidebar);
+            document.getElementById('overlay').addEventListener('click', toggleSidebar);
+            
+            // أحداث الروابط في القائمة الجانبية
+            // فتح/إغلاق القائمة الجانبية
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    
+    if (sidebar.classList.contains('open')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
+}document.getElementById('addPostLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    document.getElementById('addPostForm').reset();
+                    openModal('addPostModal');
+                    toggleSidebar();
+                } else {
+                    showAlert('يجب تسجيل الدخول أولاً', 'error');
+                }
+            });
+            
+            document.getElementById('transferPointsLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentUser) {
+                    document.getElementById('transferPointsForm').reset();
+                    openModal('transferPointsModal');
+                    toggleSidebar();
+                } else {
+                    showAlert('يجب تسجيل الدخول أولاً', 'error');
+                }
+            });
+            
+            document.getElementById('profileLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showProfilePage();
+                toggleSidebar();
+            });
+            
+            document.getElementById('homeLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showHomePage();
+                toggleSidebar();
+            });
+            
+            document.getElementById('dailyTasksLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showDailyTasks();
+                toggleSidebar();
+            });
+            
+            document.getElementById('challengesLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showChallenges();
+                toggleSidebar();
+            });
+            
+            document.getElementById('leaderboardLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showLeaderboard();
+                toggleSidebar();
+            });
+            
+            document.getElementById('adminPanelLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showAdminPanel();
+                toggleSidebar();
+            });
+            
+            // أحداث النماذج
+            document.getElementById('addPostForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const content = document.getElementById('postContent').value.trim();
+                const mediaUrl = document.getElementById('postMedia').value.trim();
+                addPost(content, mediaUrl);
+            });
+            
+            document.getElementById('transferPointsForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const receiverId = document.getElementById('receiverId').value.trim();
+                const amount = parseInt(document.getElementById('pointsAmount').value);
+                transferPoints(receiverId, amount);
+            });
+            
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                register();
+            });
+            
+            // أحداث الإشعارات
+            document.getElementById('notificationBtn').addEventListener('click', openNotifications);
+            document.getElementById('closeNotifications').addEventListener('click', closeNotifications);
+            
+            // أحداث الدردشة
+            document.getElementById('chatBtn').addEventListener('click', () => {
+                if (currentUser) {
+                    openModal('startChatModal');
+                } else {
+                    showAlert('يجب تسجيل الدخول أولاً', 'error');
+                }
+            });
+            
+            document.getElementById('closeChat').addEventListener('click', () => {
+                document.getElementById('chatContainer').classList.remove('open');
+                currentChat = null;
+            });
+            
+            document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+            document.getElementById('chatMessageInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // جلب البيانات عند تحميل الصفحة
+            fetchData();
+            setupInfiniteScroll();
+            
+            // التحقق من وجود مستخدم مسجل الدخول
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    updateUserInfo();
+                    startNotificationUpdates();
+                    startChatUpdates();
+                } catch (e) {
+                    console.error("Error parsing saved user:", e);
+                    localStorage.removeItem('currentUser');
+                }
+            }
+        };
+    </script>
+</body>
+</html>
